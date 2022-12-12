@@ -13,7 +13,7 @@ contract Game {
     event Lose(address indexed Loser);
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Not an owner!");
+        require(msg.sender == owner, "Game: Not an owner!");
         _;
     }
 

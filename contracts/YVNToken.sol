@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract YVNToken is IERC20, Ownable {
     address owner;
     uint _totalSupply;
-    uint maxTotalSupply;
+    uint maxSupply;
     uint decimals = 18;
     string name;
     string symbol;
@@ -22,13 +22,13 @@ contract YVNToken is IERC20, Ownable {
     constructor(
         string memory _name,
         string memory _symbol,
-        uint _maxTotalSupply
+        uint _maxSupply
     ) {
         owner = msg.sender;
         name = _name;
         symbol = _symbol;
-        maxTotalSupply = _maxTotalSupply;
-        _totalSupply = _maxTotalSupply;
+        maxSupply = _maxSupply;
+        _totalSupply = _maxSupply;
     }
 
     /**
@@ -73,7 +73,7 @@ contract YVNToken is IERC20, Ownable {
      * @param _amount shipping amount
      */
     function transfer(address _to, uint256 _amount) external returns (bool) {
-        require(_to != address(0), "Cant approve to 0 address!");
+        require(_to != address(0), "Cant transfer to 0 address!");
         require(balances[msg.sender] >= _amount, "Not enough tokens!");
         balances[msg.sender] -= _amount;
         balances[_to] += _amount;
@@ -145,8 +145,9 @@ contract YVNToken is IERC20, Ownable {
      * @param _amount tokens amount ot burn
      */
     function burn(address _addr, uint _amount) public onlyOwner {
+        require(_addr != address(0), "Incorrect address!");
         require(balances[_addr] >= _amount, "Incorrect amount!");
-        require(_totalSupply >= _amount, "Incorrect amount!");
+        balances[_addr] -= _amount;
         _totalSupply -= _amount;
     }
 
@@ -156,7 +157,8 @@ contract YVNToken is IERC20, Ownable {
      * @param _amount tokens amount to mint
      */
     function mint(address _addr, uint _amount) public onlyOwner {
-        require(_totalSupply + _amount <= maxTotalSupply, "Cant mint token!");
+        require(_addr != address(0), "Incorrect address!");
+        require(_totalSupply + _amount <= maxSupply, "Cant mint token!");
         balances[_addr] += _amount;
         _totalSupply += _amount;
     }

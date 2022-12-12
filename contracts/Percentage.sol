@@ -6,14 +6,16 @@ pragma solidity 0.8.9;
  * @dev this contract receives funds and send it to partners depending on percentage
  */
 contract Percentage {
+    uint totalPercentage;
     address owner;
     bool lock;
+    
 
     mapping(address => uint) partners;
     address[] club;
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Not an owner!");
+        require(msg.sender == owner, "Percentage: Not an owner!");
         _;
     }
 
@@ -23,8 +25,6 @@ contract Percentage {
         _;
         lock = false;
     }
-
-    event Withdraw(address indexed account, uint balance);
 
     constructor() {
         owner = msg.sender;
@@ -36,12 +36,19 @@ contract Percentage {
      * @param _percentage to fix partners percentage
      */
     function addPartner(address _addr, uint _percentage) public onlyOwner {
-        uint i = getUserIndex(_addr);
-
-        if(i == club.length) {
-            club.push(_addr);
-        }
+        bool boo;
+        uint i;
+        (i, boo) = getUserIndex(_addr);
         
+        if(!boo) {
+            require(totalPercentage + _percentage <= 100, "Percentage: Cant add partner, total percentage become more than 100% !");
+            club.push(_addr);
+            totalPercentage += _percentage;
+        } else {
+            require(totalPercentage + _percentage - partners[_addr] <= 100, "Percentage: Cant add partner, total percentage become more than 100% !");
+            totalPercentage = totalPercentage + _percentage - partners[_addr];
+        }
+
         partners[_addr] = _percentage;
         
     }
@@ -51,16 +58,23 @@ contract Percentage {
      * @param _addr target address to remove from list
      */
     function deletePartner(address _addr) public onlyOwner {
+        bool boo;
+        uint i;
+        (i, boo) = getUserIndex(_addr);
+        if(!boo){
+            return;
+        }
+
         delete partners[_addr];
-        deleteFromClub(_addr);
+        deleteFromClub(i);
     }
 
     /**
      * @dev to remove partner from club
-     * @param _addr target address
      */
-    function deleteFromClub(address _addr) private {
-        uint i = getUserIndex(_addr);
+    function deleteFromClub(uint i) private {
+        
+        totalPercentage -= partners[club[i]];
         address temp;
         temp = club[i];
         club[i] = club[club.length - 1];
@@ -71,16 +85,19 @@ contract Percentage {
     /**
      * @dev get index of address in club
      * @param _addr the target address
-     * @return index of address 
+     * @return index of address
+     * @return bool variable to understand is the address on the club
      */
-    function getUserIndex(address _addr) private view returns (uint) {
+    function getUserIndex(address _addr) private view returns (uint, bool) {
         uint i;
+        bool boo;
         for(i; i < club.length; i++) {
             if(club[i] == _addr) {
+                boo = true;
                 break;
             }
         }
-        return i;
+        return (i, boo);
     }
 
     /**
@@ -90,6 +107,9 @@ contract Percentage {
         for (uint i; i < club.length; i++) {
             uint amount = (msg.value * partners[club[i]]) / 100;
             payable(club[i]).transfer(amount);
+        }
+        if(address(this).balance != 0) {
+            payable(owner).transfer(address(this).balance);
         }
     }
 

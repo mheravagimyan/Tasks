@@ -10,7 +10,7 @@ pragma solidity 0.8.9;
 contract Shop {
     address owner;
 
-    struct user {
+    struct User {
         string name;
         string surName;
         string[] product;
@@ -18,7 +18,7 @@ contract Shop {
 
     mapping(string => uint) productPrice;
     mapping(string => uint) productQuantity;
-    mapping(address => user) userData;
+    mapping(address => User) userData;
 
     event Buy(
         string indexed name,
@@ -105,7 +105,7 @@ contract Shop {
      */
     function getUserData(
         address _address
-    ) external view onlyOwner returns (user memory) {
+    ) external view onlyOwner returns (User memory) {
         return userData[_address];
     }
 
