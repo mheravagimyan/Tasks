@@ -8,52 +8,57 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @dev ERC20 token inherited from IERC20 interface and Ownable
  */
 contract YVNToken is IERC20, Ownable {
-    address owner;
     uint _totalSupply;
-    uint maxSupply;
-    uint decimals = 18;
-    string name;
-    string symbol;
+    uint _maxSupply;
+    uint _decimals = 18;
+    string _name;
+    string _symbol;
 
     mapping(address => uint) balances;
 
     mapping(address => mapping(address => uint)) allowances;
 
     constructor(
-        string memory _name,
-        string memory _symbol,
-        uint _maxSupply
+        string memory name_,
+        string memory symbol_,
+        uint maxSupply_
     ) {
-        owner = msg.sender;
-        name = _name;
-        symbol = _symbol;
-        maxSupply = _maxSupply;
-        _totalSupply = _maxSupply;
+        _name = name_;
+        _symbol = symbol_;
+        _maxSupply = maxSupply_;
+        _totalSupply = maxSupply_;
     }
 
     /**
      * @dev to get token name
      */
-    function getName() external view returns (string memory) {
-        return name;
+    function name() external view returns (string memory) {
+        return _name;
     }
 
     /**
      * @dev to get token Symbol
      */
-    function getSymbol() external view returns (string memory) {
-        return symbol;
+    function symbol() external view returns (string memory) {
+        return _symbol;
     }
 
     /**
      * @dev to get token decimals
      */
-    function getDecimals() external view returns (uint) {
-        return decimals;
+    function decimals() external view returns (uint) {
+        return _decimals;
     }
 
     /**
-     * @dev to get token total supply
+     * @dev to get token maxSupply
+     */
+    function maxSupply() external view returns (uint) {
+        return _maxSupply;
+    }
+
+    /**
+     * @dev to get token current total supply
      */
     function totalSupply() external view returns (uint256) {
         return _totalSupply;
@@ -113,6 +118,7 @@ contract YVNToken is IERC20, Ownable {
         allowances[msg.sender][_spender] += _amount;
 
         emit Approval(msg.sender, _spender, _amount);
+        return true;
     }
 
     /**
@@ -137,6 +143,7 @@ contract YVNToken is IERC20, Ownable {
         balances[_to] += _amount;
 
         emit Transfer(_from, _to, _amount);
+        return true;
     }
 
     /**
@@ -158,7 +165,7 @@ contract YVNToken is IERC20, Ownable {
      */
     function mint(address _addr, uint _amount) public onlyOwner {
         require(_addr != address(0), "Incorrect address!");
-        require(_totalSupply + _amount <= maxSupply, "Cant mint token!");
+        require(_totalSupply + _amount <= _maxSupply, "Cant mint token!");
         balances[_addr] += _amount;
         _totalSupply += _amount;
     }
