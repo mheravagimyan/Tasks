@@ -11,9 +11,10 @@ describe.only("Integral", function() {
     int = await Integral.deploy();
     await int.deployed();
 
-    const result = await int.calcIntegral([[1,2],[3,4]], 0, 4, 200);
-    // expect(result).to.eq(21);
+    await int.calcIntegral([[1, 2], [3, 4]], 0, 4, 200);
+    // expect(result).to.eq(128035);
 
-    console.log(result);
+    
+    console.log("The answer is: ", await int.answer());
   });
 });

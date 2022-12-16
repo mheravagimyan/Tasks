@@ -1,72 +1,55 @@
-// SPDX-License-Identifier: MIT
-// pragma solidity 0.8.9;
-
-// /**
-//  * @title Integral
-//  * @dev this contract calculate a definite integral using the rectangular integration.
-//  * the number of iterations is 100.
-//  */
-// contract Integral {
-//     uint index;
-//     struct Data {
-//         uint coefficient;
-//         uint degree;
-//     }
-
-//     /**
-//      * @dev get parameter and return the functions value (for simplicity, the given function will be only polynomial)
-//      * @param x each iteration result
-//      * @return value of function at the given point
-//      */
-//     function inFunction(uint x) public pure returns (uint) {
-//         return x ** 2;
-//     }
-
-//     /**
-//      * @dev calculate a definite integral
-//      * @param a the lower bound
-//      * @param b the upper bound
-//      * @param n iteration amount
-//      * @return value of definite integral
-//      */
-//     function calcIntegral(uint a, uint b, uint n) public pure returns (uint) {
-//         uint result;
-//         uint h = ((b - a) * 1000) / n; // * 1000 to store numbers after the decimal point
-
-//         for (uint i; i < n; i++) {
-//             result += inFunction(a * 1000 + h / 2 + i * h); // * 1000 to store numbers after the decimal point
-//         }
-
-//         result *= h;
-//         result /= 1000000000; // to get the correct value
-//         return result;
-//     }
-// }
-
+//SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-contract Integral {
+import "@openzeppelin/contracts/utils/Strings.sol";
 
-    function calc(uint[][] memory arr, uint x) public pure returns (uint) {
+/**
+ * @title Integral
+ * @dev this contract calculate a definite integral using the rectangular integration.
+ * the number of iterations is 100.
+ */
+contract Integral {
+    // to count the sum after the decimal point
+    uint public sum;
+    // to save the result as string
+    string public answer;
+
+    /**
+     * @dev get parameter and return the functions value (for simplicity, the given function will be only polynomial)
+     * @param x each iteration result
+     * @param arr the array which will be made up of pairs of numbers
+     * the first is coefficient and the second is degree
+     * @return value of function at the given point
+     */
+    function calc(uint[][] memory arr, uint x) private returns (uint) {
         uint result;
+        uint item;
         for(uint i; i < arr.length; i++) {
-            result += (arr[i][0] * x ** arr[i][1]) / (1000 ** arr[i][1]);
+            item = arr[i][0] * x ** arr[i][1]; 
+            sum += (item / (10000 ** (arr[i][1] - 1))) % 10000; // receive the sum after the decimal point 
+            result += item / (10000 ** arr[i][1]); // receive the sum before the decimal point
         }
         return result;
     }
-
-
-    function calcIntegral(uint[][] memory arr, uint a, uint b, uint n) public pure returns(uint) {
+    
+    /**
+     * @dev calculate a definite integral
+     * @param arr the array which will be made up of pairs of numbers
+     * the first is coefficient and the second is degree
+     * @param a the lower bound
+     * @param b the upper bound
+     * @param n iteration amount
+     */
+    function calcIntegral(uint[][] memory arr, uint a, uint b, uint n) public {
         uint result;
-        uint h = (b - a) * 1000 / n;
+        uint h = (b - a) * 10000 / n;
 
         for(uint i; i < n; i++) {
-            result += calc(arr, a * 1000 + h / 2 + i * h);
+            result += calc(arr, a * 10000 + h / 2 + i * h);
         }
-
+        result += sum / 10000;
         result *= h;
-        result /= 1000;
-        return result;
-    } 
+        answer = string(abi.encodePacked(Strings.toString(result / 10000), ".", Strings.toString(result % 1000)));
+    }
 
 }
