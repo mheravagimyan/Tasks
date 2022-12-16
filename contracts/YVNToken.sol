@@ -137,9 +137,9 @@ contract YVNToken is IERC20, Ownable {
             "Incorrect addresses!"
         );
         require(balances[_from] >= _amount, "Not enough tokens!");
-        require(allowance(_from, _to) >= _amount, "Incorrect amount!");
+        require(allowance(_from, msg.sender) >= _amount, "Incorrect amount!");
         balances[_from] -= _amount;
-        allowances[_from][_to] -= _amount;
+        allowances[_from][msg.sender] -= _amount;
         balances[_to] += _amount;
 
         emit Transfer(_from, _to, _amount);
