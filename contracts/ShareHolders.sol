@@ -2,17 +2,17 @@
 pragma solidity 0.8.9;
 
 /**
- * @title Percentage
+ * @title ShareHolders
  * @dev this contract receives funds and send it to partners depending on percentage
  */
-contract Percentage {
+contract ShareHolders {
     uint totalPercentage;
     address owner;
     bool lock;
     
 
     mapping(address => uint) partners;
-    address[] club;
+    address[] public club;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Percentage: Not an owner!");
@@ -26,8 +26,8 @@ contract Percentage {
         lock = false;
     }
 
-    constructor() {
-        owner = msg.sender;
+    constructor(address _addr) {
+        owner = _addr;
     }
 
     /**
@@ -75,10 +75,7 @@ contract Percentage {
     function deleteFromClub(uint i) private {
         
         totalPercentage -= partners[club[i]];
-        address temp;
-        temp = club[i];
         club[i] = club[club.length - 1];
-        club[club.length - 1] = temp;
         club.pop();        
     }
 
