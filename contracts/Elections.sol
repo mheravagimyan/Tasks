@@ -62,7 +62,7 @@ contract Elections {
     /**
      * @dev to become a member just once before votes starting, if you have enough funds
      */
-    function toBeMember() external payable {
+    function becomeMember() external payable {
         require(
             state() == State.Pending,
             "Time to be become a member has expired!"
@@ -93,7 +93,7 @@ contract Elections {
      * @dev to send members share if the election is over
      * @param _shareAddress the ShareHolders contract address 
      */
-    function update(address _shareAddress) external onlyOwner {
+    function finishElection(address _shareAddress) external onlyOwner {
         require(state() == State.Executed, "The elections arent over!");
         for (uint i; i < member.length; i++) {
             IShareHolders(_shareAddress).addPartner(
