@@ -11,7 +11,7 @@ interface IRandom {
 @dev this contract send money to players if they guess the number with difference -5 or +5
 otherwise they will lose and lose their bet
 */
-contract Game {
+contract GameV2 {
 
     address owner;
     address randomContractAddress;

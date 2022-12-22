@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import "./ShareHolders.sol";
-
 /**
  * @title IShareHolders
  * @dev Via this interface send the memebrs their share 
