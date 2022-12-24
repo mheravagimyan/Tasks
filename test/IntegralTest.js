@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe.only("Integral", function() {
+describe("Integral", function() {
   it("Integral", async function () {
     let owner;
     let int;
