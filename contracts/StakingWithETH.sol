@@ -11,9 +11,10 @@ import "./YVNToken.sol";
  * 2. Receive their reward and ETH 
  */
 contract StakingWithETH {
-    YVNToken token;
-    uint time;
-    uint x; // amount/second
+    address owner;
+    YVNToken public token;
+    uint public time;
+    uint public x; // amount/second
     uint totalEth;
     address[] user;
 
@@ -22,7 +23,21 @@ contract StakingWithETH {
         uint reward;
     }
 
-    mapping(address => User) users;
+    mapping(address => User) public users;
+
+    event Deposit(address indexed sender, uint amount);
+    event Withdraw(address indexed sender, uint EthAmount, uint rewardAmount);
+    event Claim(address indexed sender, uint rewardAmount);
+
+    modifier onlyOwner() {
+        require(owner == msg.sender, "StakingWithETH: Not an owner!");
+        _;
+    }
+
+    modifier access(address _addr) {
+        require(owner == msg.sender || _addr == msg.sender, "StakingWithETH: Must be owner or get only own data!");
+        _;
+    } 
 
     /**
      * @dev get initial amount to add persecond
@@ -30,6 +45,7 @@ contract StakingWithETH {
      * @param _x amount to add persecond
      */
     constructor(address _yvnAddress, uint _x) {
+        owner = msg.sender;
         token = YVNToken(_yvnAddress);
         x = _x;
     }
@@ -51,6 +67,8 @@ contract StakingWithETH {
 
         users[msg.sender].ethBalance += msg.value;
         totalEth += msg.value;
+
+        emit Deposit(msg.sender, msg.value);
     }
 
     /**
@@ -73,6 +91,8 @@ contract StakingWithETH {
         token.transfer(msg.sender, userData.reward);
 
         totalEth -= userData.ethBalance;
+
+        emit Withdraw(msg.sender, userData.ethBalance, userData.reward);
     }
 
     /**
@@ -90,6 +110,8 @@ contract StakingWithETH {
         users[msg.sender].reward = 0;
 
         token.transfer(msg.sender, claimAmount);
+
+        emit Claim(msg.sender, claimAmount);
     }
 
     /**
@@ -108,6 +130,7 @@ contract StakingWithETH {
 
     /**
      * @dev delete users data
+     * @param _addr target address
      */
     function deleteUser(address _addr) private {
         for (uint i; i < user.length; i++) {
@@ -116,6 +139,24 @@ contract StakingWithETH {
                 user.pop();
             }
         }
+    }
+
+    /**
+     * @dev to get users data
+     * @dev Each user can take only own data or sender must be owner
+     * @param _addr user address
+     * @return data of user
+     */
+    function getUserData(address _addr) public view access(_addr) returns(User memory) {
+        return users[_addr];
+    }
+
+    /**
+     * @dev to get current token amount before sharing
+     * @return amount of tokens that accumulated;
+     */
+    function getCurrentReward() public view onlyOwner returns(uint) {
+        return (block.timestamp - time) * x;
     }
 
 }
