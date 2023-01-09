@@ -26,7 +26,6 @@ contract YVNToken is IERC20, Ownable {
         _name = name_;
         _symbol = symbol_;
         _maxSupply = maxSupply_;
-        _totalSupply = maxSupply_ / 2;
     }
 
     /**
